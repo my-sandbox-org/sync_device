@@ -10,12 +10,12 @@ The project is based on Arduino hardware but does _not_ use the Arduino library 
 
 We use hardware 16-bit timer/counters 1 and 3 (`TCNT1` and `TCNT3`) with four corresponding interrupt vectors (compare matches `COMPA`, `COMPB`, `COMPC`, and overflow event `OVF`) for generation of signals, and hardware UART module for communication with the host computer. The UART communication runs in the background and does not rely on interrupts to avoid any jitter in the generated signals.
 
-The synchronization device is a state machine with a set of global variables (timings, spectral channels, etc) that control its behavior. The variables are set by the software of the host computer via UART communication protocol (see corresponding section below). The values of global variables persist from acquisition to acquisition. Generally, we distinguish between three global system states:
+The synchronization device is a state machine with a set of global variables (timings, spectral channels, etc) that control its behavior. The variables are set by the software of the host computer via UART communication protocol (see corresponding section below). The values of global variables persist from acquisition to acquisition. Generally, we distinguish between four global system states:
 
- * `IDLE` - no signals are generated. Hardware timer/counters 1 and 3 are not running.
+ * `IDLE` - no signals are generated. Hardware timer/counters 1 and 3 are not running. Laser shutters are closed.
  * `STRB_ACQ` - stroboscopic/ALEX/timelapse imaging (see waveforms below). The CMOS camera runs in the _level trigger_ mode. During each camera exposure the field of view is briefly illuminated by a laser, following by camera readout, and (optional) waiting period for timelapse. If ALEX is enabled, imaging is done in bursts of frames, where each frame within the burst is illuminated by a different laser. There is an optional waiting period between bursts for timelapse ALEX imaging.
  * `CONT_ACQ` - continuous imaging. The CMOS camera is in the _synchronous readout_ mode. The laser shutter(s) is/are open during the entire acquisition, and camera is triggered at precise time points. The first camera frame must be thrown away as it contains noise accumulated before the acquisition has started.
-
+ * `MANUAL` - laser shutters are manually opened without triggering the camera. Can be activated only from `IDLE` state and only if at least one laser is active. Send `Q` command to return to `IDLE` state and close laser shutters.
 
 ## Detailed description of imaging modes
 ### Stroboscopic Imaging

@@ -142,10 +142,14 @@ void parse_UART_command(const Data data)
 
 		// Set laser shutters and ALEX
 		case 'L':
-		sys.lasers_in_use = data.lasers.lasers_in_use;
+		sys.lasers_in_use = data.lasers.lasers_in_use & SHUTTERS_MASK;
 		sys.ALEX_enabled = data.lasers.ALEX_enabled;
 		reset_lasers();
 		UART_tx_ok();
+		if (sys.status == MANUAL)
+		{
+			set_lasers(sys.lasers_in_use);
+		}
 		break;
 
 		// Set acquisition period between frames/bursts
@@ -186,15 +190,19 @@ void parse_UART_command(const Data data)
 
 		// Manually open laser shutters
 		case 'M':
-		if (sys.status == IDLE)
-		{
-			UART_tx_ok();
-			set_lasers(sys.lasers_in_use);
-		}
-		else
+		if (sys.status != IDLE)
 		{
 			UART_tx_err("M: Not in the IDLE state");
+			break;
 		}
+		if (sys.lasers_in_use == 0)
+		{
+			UART_tx_err("M: All lasers are disabled");
+			break;
+		}
+		UART_tx_ok();
+		set_lasers(sys.lasers_in_use);
+		sys.status = MANUAL;
 		break;
 
 		// Stop acquisition

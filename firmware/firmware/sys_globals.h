@@ -68,6 +68,7 @@ enum STATUS
 	IDLE = 0,    // Doing nothing, waiting for commands
 	CONT_ACQ,    // Continuous data acquisition (camera in synchronous readout mode)
 	STRB_ACQ,    // Stroboscopic acquisition
+	MANUAL,		 // Manually opened laser shutters
 };
 
 typedef struct SystemSettings

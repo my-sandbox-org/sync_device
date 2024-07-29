@@ -26,9 +26,10 @@ setup(
     url=about["__url__"],
     packages=["avrpy"],
     include_package_data=True,
-    python_requires=">=3.8.*",
+    python_requires=">=3.8",
     install_requires=[
         "pyserial",
+        "numpy",
     ],
     license=about["__license__"],
     zip_safe=False,

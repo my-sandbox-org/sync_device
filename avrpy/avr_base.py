@@ -3,7 +3,7 @@ from cProfile import run
 from numpy import byte
 from serial import Serial
 from enum import Enum
-from time import sleep
+import time
 from .__version__ import __version__
 from .constants import ms, MHz
 from ctypes import c_uint8
@@ -38,8 +38,50 @@ class SyncDeviceError(ValueError):
         self.message = message + "\nDevice reply:\n -> " + reply
         super().__init__(self.message)
 
+class LoggingSerial(Serial):
+    def __init__(self, *args, log_file=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if log_file == "print":
+            self.log_to_stdout = True
+            self.log_file = None
+        else:
+            self.log_to_stdout = False
+            self.log_file = open(log_file, 'a') if log_file else None
 
-class Port(Serial):
+    def write(self, data):
+        if self.log_file or self.log_to_stdout:
+            timestamp = time.strftime("%H:%M:%S")
+            arguments = data[1:]
+            argument_uint32 = int.from_bytes(arguments, byteorder='little', signed=False)
+            log_entry = (
+                f"{timestamp} TX:  {data} -> "
+                f"{data.decode('ascii', errors='ignore')[0]} {argument_uint32:05d}\n"
+            )
+            if self.log_to_stdout:
+                print(log_entry, end='')
+            else:
+                self.log_file.write(log_entry)
+                self.log_file.flush()
+        super().write(data)
+
+    def readline(self, size=None):
+        data = super().readline(size)
+        if data and (self.log_file or self.log_to_stdout):
+            timestamp = time.strftime("%H:%M:%S")
+            log_entry = f"{timestamp} RX: {data.decode('utf-8', errors='ignore')}\n"
+            if self.log_to_stdout:
+                print(log_entry, end='')
+            else:
+                self.log_file.write(log_entry)
+                self.log_file.flush()
+        return data
+
+    def close(self):
+        if self.log_file:
+            self.log_file.close()
+        super().close()
+
+class Port(LoggingSerial):
     def __enter__(self):
         self.reset_input_buffer()
         return self
@@ -86,8 +128,8 @@ class AVR_Base(object):
     However, it is recommended to derive a class for a specific MCU by calling `define_AVR` with list of registers
     """
 
-    def __init__(self, port, baudrate):
-        self.com = Port(port, baudrate=baudrate)
+    def __init__(self, port, baudrate, log_file=None):
+        self.com = Port(port, baudrate=baudrate, log_file=log_file)
         if not self.com.is_open:
             self.com.open()
 
@@ -115,7 +157,7 @@ class AVR_Base(object):
                 )
 
         self.com.reset_input_buffer()
-        sleep(10 * ms)
+        time.sleep(10 * ms)
 
         self._transaction_mode_ = False
         self._buffer_ = bytearray()
@@ -299,8 +341,8 @@ def define_AVR(RegisterList: RegisterBase):
     """
 
     class AVR(AVR_Base):
-        def __init__(self, port, baudrate=2 * MHz):
-            super().__init__(port, baudrate)
+        def __init__(self, port, baudrate=2 * MHz, log_file=None):
+            super().__init__(port, baudrate, log_file=log_file)
 
     for register in RegisterList:
 

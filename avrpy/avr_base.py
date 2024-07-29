@@ -54,8 +54,8 @@ class LoggingSerial(Serial):
             arguments = data[1:]
             argument_uint32 = int.from_bytes(arguments, byteorder='little', signed=False)
             log_entry = (
-                f"{timestamp} TX:  {data} -> "
-                f"{data.decode('ascii', errors='ignore')[0]} {argument_uint32:05d}\n"
+                f"{timestamp} TX: {str(data):<20} -> "
+                f"{data.decode('ascii', errors='ignore')[0]} {argument_uint32}\n"
             )
             if self.log_to_stdout:
                 print(log_entry, end='')

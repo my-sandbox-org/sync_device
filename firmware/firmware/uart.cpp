@@ -176,6 +176,12 @@ void parse_UART_command(const Data data)
 		UART_tx_ok();
 		break;
 
+		// Set fluidics trigger
+		case 'F':
+		sys.fluidics_frame = data.int32_value;
+		UART_tx_ok();
+		break;
+
 		// Start stroboscopic acquisition
 		case 'S':
 		UART_tx_ok();

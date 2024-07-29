@@ -15,7 +15,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define VERSION "0.4.2\n"
+#define VERSION "0.5.0\n"
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -80,6 +80,7 @@ typedef struct SystemSettings
 	uint32_t acq_period_us;     // Time period between subsequent frames or bursts of frames (ALEX)
 	uint32_t n_frames;          // 0 means unlimited. In ALEX, it means number of bursts
 	uint32_t n_acquired_frames; // Total number of acquired frames (pulses to camera)
+	int32_t  fluidics_frame;    // At what frame to trigger fluidics. -1, default, means no trigger
 	uint8_t  current_laser;     // Bit pattern indicating currently active laser
 	uint8_t  lasers_in_use;     // Bit pattern to control laser shutters. Bit 0: Cy2, bit 3: Cy7
 	bool     ALEX_enabled;      // Whether ALEX is active or not

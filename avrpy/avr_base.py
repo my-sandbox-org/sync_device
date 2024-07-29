@@ -163,7 +163,7 @@ class AVR_Base(object):
         self._buffer_ = bytearray()
 
         # properties
-        self._fluidics_delay = 0
+        self._fluidics_trigger_frame = -1
         self._acq_period_us = 100000
         self._exp_time_us = 25000
         self._shutter_delay_us = 1000
@@ -230,14 +230,14 @@ class AVR_Base(object):
         self._set_8bit_register(addrL, byte_L)
 
     @property
-    def fluidics_delay(self):
+    def fluidics_trigger_frame(self):
         """
         Delay between the fluidic trigger and the start of the image acquisition
         """
-        return self._fluidics_delay
+        return self._fluidics_trigger_frame
 
-    @fluidics_delay.setter
-    def fluidics_delay(self, us=0):
+    @fluidics_trigger_frame.setter
+    def fluidics_trigger_frame(self, us=0):
         with self.com as com:
             com.write(pad(b"F" + c32(us)))
 

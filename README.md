@@ -20,7 +20,7 @@ The synchronization device is a state machine with a set of global variables (ti
 ## Detailed description of imaging modes
 ### Stroboscopic Imaging
 
-![Stroboscopic Imaging](doc/waveforms/stroboscopic%20imaging.svg)
+![Stroboscopic Imaging](doc/stroboscopic_acq_timings.svg)
 
 Before starting the stroboscopic imaging, it is essential to correctly set the following system variables (in microseconds):
 

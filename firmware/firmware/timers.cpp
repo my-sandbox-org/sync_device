@@ -6,6 +6,18 @@ static uint16_t t3_cycle = 0;
 static uint16_t t3_N_OVF_cycles = 1;
 static bool last_burst_frame = false;
 
+void update_fluidics_pin()
+{
+	if (sys.fluidics_frame == static_cast <int32_t> (sys.n_acquired_frames))
+	{
+		bitSet(FLUIDIC_PORT, FLUIDIC_PIN);
+	}
+	else
+	{
+		bitClear(FLUIDIC_PORT, FLUIDIC_PIN);		
+	}
+}
+
 void setup_timer3(uint32_t us)
 {
 	t3_cycle = 0;
@@ -59,6 +71,8 @@ void start_continuous_acq(uint32_t n_frames /*= 0*/)
 	
 	// Trigger camera
 	bitSet(CAMERA_PORT, CAMERA_PIN);
+	
+	update_fluidics_pin();
 }
 
 
@@ -96,6 +110,8 @@ void start_stroboscopic_acq(uint32_t n_frames /*= 0*/)
 
 	// open laser shutters
 	set_lasers(sys.current_laser);
+	
+	update_fluidics_pin();
 }
 
 
@@ -206,6 +222,8 @@ ISR(TIMER1_OVF_vect)
 			set_lasers(sys.current_laser);
 		}
 	}
+	
+	update_fluidics_pin();
 }
 
 
@@ -237,9 +255,10 @@ ISR(TIMER3_OVF_vect) // used only for stroboscopic acquisition mode
 
 void stop_acq()
 {
-	// Turn off lasers and camera
+	// Turn off lasers, camera, and fluidics
 	lasers_off();
 	bitClear(CAMERA_PORT, CAMERA_PIN);
+	update_fluidics_pin();
 
 	// Reset everything
 	sys.status = IDLE;

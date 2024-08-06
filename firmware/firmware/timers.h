@@ -12,7 +12,7 @@
 #include "sys_globals.h"
 
 // 16bit timer prescaler configuration. See AtMega2560 data sheet table 17-6
-#define PRESC1024
+#define PRESC256
 
 #ifdef PRESC8  // max TC1 period is 32ms
 const uint8_t presc_shift = 1;
